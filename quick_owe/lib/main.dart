@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(const QuickOweApp());
@@ -37,76 +35,133 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _counter = 0;
 
+  List<UniqueKey> _borrowerKeys = [];
   Map<UniqueKey, TextEditingController> _nameControllers = {};
   Map<UniqueKey, TextEditingController> _subtotalControllers = {};
   Map<UniqueKey, TextEditingController> _oweControllers = {};
 
-  void _incrementCounter() {
+  final TextEditingController _taxController = TextEditingController(text: "0.00");
+  final TextEditingController _tipController = TextEditingController(text: "0.00");
+
+  void _addBorrowerSubtotalCard() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      final borrowerKey = UniqueKey();
+
+      _borrowerKeys.add(borrowerKey);
+      _nameControllers.putIfAbsent(borrowerKey, () => TextEditingController());
+      _subtotalControllers.putIfAbsent(borrowerKey, () => TextEditingController());
+      _oweControllers.putIfAbsent(borrowerKey, () => TextEditingController());
+    });
+  }
+
+  void _removeBorrowerSubtotalCard(UniqueKey borrowerKey) {
+    setState(() {
+      _borrowerKeys.remove(borrowerKey);
+      _nameControllers.remove(borrowerKey);
+      _subtotalControllers.remove(borrowerKey);
+      _oweControllers.remove(borrowerKey);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the HomeScreen object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(widget.title)
+            Text(widget.title, style: const TextStyle(fontSize: 28))
           ],
         )
       ),
+      resizeToAvoidBottomInset: false,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                buildBorrower(),
-                buildBorrower()
+                SizedBox(
+                   height: MediaQuery.of(context).size.height * 3/4 - 50,
+                   child: ListView.builder(
+                     itemCount: _borrowerKeys.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return buildBorrower(_borrowerKeys[index]);
+                      },
+                    )
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      child: const Icon(Icons.add_circle_outlined, size: 50, color: Colors.grey),
+                      onTap: () {
+                        _addBorrowerSubtotalCard();
+                      },
+                    )
+                  ],
+                ),
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                      color: Colors.yellowAccent[400],
+                      borderRadius: BorderRadius.circular(10.0)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 10.0, bottom: 10.0),
+                    child: Row(
+                      children: [
+                        const Text("Tax: \$", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 4,
+                            child: TextField(
+                                decoration: const InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.transparent)
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white70
+                                ),
+                                controller: _taxController,
+                                showCursor: true,
+                                style: const TextStyle(fontSize: 20)
+                            )
+                        ),
+                        const Spacer(),
+                        const Text("Tip: \$", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width / 4,
+                            child: TextField(
+                                decoration: const InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.transparent)
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white70
+                                ),
+                                controller: _tipController,
+                                showCursor: true,
+                                style: const TextStyle(fontSize: 20)
+                            )
+                        )
+                      ],
+                    ),
+                  ),
+                )
               ]
           )
         )
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ) // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Widget buildBorrower() {
-    final UniqueKey borrowerKey = UniqueKey();
-    final nameController = TextEditingController();
-    final subtotalController = TextEditingController();
-    final oweController = TextEditingController();
-
-    _nameControllers.putIfAbsent(borrowerKey, () => nameController);
-    _subtotalControllers.putIfAbsent(borrowerKey, () => subtotalController);
-    _oweControllers.putIfAbsent(borrowerKey, () => oweController);
-
+  Widget buildBorrower(UniqueKey borrowerKey) {
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.greenAccent[400],
-            borderRadius: BorderRadius.circular(10.0)
+              color: Colors.greenAccent[400],
+              borderRadius: BorderRadius.circular(10.0)
           ),
           child: Padding(
             padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 10.0, bottom: 10.0),
@@ -121,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           filled: true,
                           fillColor: Colors.white70
                       ),
-                      controller: nameController,
+                      controller: _nameControllers[borrowerKey],
                       showCursor: true,
                       style: const TextStyle(fontSize: 20),
                     )
@@ -129,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Spacer(),
                 const Text("\$", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width / 3,
+                    width: MediaQuery.of(context).size.width / 3,
                     child: TextField(
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(
@@ -139,10 +194,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           filled: true,
                           fillColor: Colors.white70
                         ),
-                      controller: subtotalController,
+                      controller: _subtotalControllers[borrowerKey],
                       showCursor: true,
                       style: const TextStyle(fontSize: 20),
                     )
+                ),
+                const Spacer(),
+                GestureDetector(
+                  child: const Icon(Icons.remove_circle_outlined, size: 50, color: Colors.grey),
+                  onTap: () {
+                    _removeBorrowerSubtotalCard(borrowerKey);
+                  },
                 )
               ],
             ),
