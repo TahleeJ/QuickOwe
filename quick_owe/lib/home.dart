@@ -32,12 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+  /// Adds a new person as a borrower, generating a unique key to identify them by
   void _addBorrowerSubtotalCard() {
     setState(() {
       final borrowerKey = UniqueKey();
@@ -50,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     });
   }
 
+  /// Removes the person associated with [borrowerKey] from the list of
+  /// known borrowers
   void _removeBorrowerSubtotalCard(UniqueKey borrowerKey) {
     setState(() {
       _borrowerKeys.remove(borrowerKey);
@@ -59,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     });
   }
 
+  /// Validates that [input] is neither empty nor a non-numeric value
   double validateDouble(String input) {
     if (input.isEmpty || double.tryParse(input) == null) {
       return 0.0;
@@ -67,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return double.parse(input);
   }
 
+  /// Calculates the owed amounts
   void _updateBorrowerOwe() {
     final double tax = validateDouble(_taxController.text);
     final double tip = validateDouble(_tipController.text);
@@ -283,6 +282,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  /// Creates an object for each new person added and their subtotal using
+  /// their unique key [borrowerKey]
   Widget buildBorrower(UniqueKey borrowerKey) {
     bool _validSubtotal = true;
 
@@ -361,6 +362,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  /// Creates an object for person added and their calculated owed amount using
+  /// their unique key [borrowerKey]
   Widget buildOwe(UniqueKey borrowerKey) {
     final name = _nameControllers[borrowerKey]!.text;
     final owe = _oweControllers[borrowerKey]!.text;
